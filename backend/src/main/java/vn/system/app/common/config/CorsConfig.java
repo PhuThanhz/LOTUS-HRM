@@ -18,7 +18,7 @@ public class CorsConfig {
         // cho phép các URL nào có thể kết nối tới backend
         configuration.setAllowedOrigins(
                 Arrays.asList(
-                        "http://localhost:3000",
+                        "http://124.197.28.207:8081",
                         "https://hrm.sys.vlotustech.vn"));
 
         // các method nào đc kết nối
