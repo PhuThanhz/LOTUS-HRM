@@ -6,19 +6,26 @@ services:
     container_name: hrm-mysql
     restart: always
     environment:
-      MYSQL_DATABASE: hrm
-      MYSQL_ROOT_PASSWORD: strongPassword
+      MYSQL_DATABASE: lotushrm
+      MYSQL_ROOT_PASSWORD: 26082003
       TZ: Asia/Ho_Chi_Minh
     volumes:
       - hrm_mysql_data:/var/lib/mysql
 
-  backend:
+    backend:
     build:
       context: ./backend
     container_name: hrm-backend
     restart: always
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_PASSWORD: 26082003
+      APP_DEFAULT_PASSWORD: Admin@2026
+    volumes:
+      - backend_uploads:/app/uploads
     expose:
       - "8080"
 
@@ -35,7 +42,7 @@ services:
     container_name: hrm-nginx
     restart: always
     ports:
-      - "8081:80"   # HRM chạy riêng port 8081
+      - "8081:80"
     volumes:
       - ./nginx/proxy.prod.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
