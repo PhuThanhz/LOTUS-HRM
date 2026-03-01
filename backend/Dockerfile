@@ -10,5 +10,5 @@ ENV TZ=Asia/Ho_Chi_Minh
 WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
 RUN mkdir -p /app/uploads && chmod -R 777 /app/uploads
-EXPOSE 8080
+EXPOSE 8081
 ENTRYPOINT ["java", "-jar", "app.jar"]
