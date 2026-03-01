@@ -29,7 +29,7 @@ import vn.system.app.common.util.SecurityUtil;
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfiguration {
 
-    @Value("${hoidanit.jwt.base64-secret}")
+    @Value("${lotusgroup.jwt.base64-secret}")
     private String jwtKey;
 
     @Bean

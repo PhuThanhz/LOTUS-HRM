@@ -31,7 +31,7 @@ public class EmailService {
 
     public void sendSimpleEmail() {
         SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo("ads.hoidanit@gmail.com");
+        msg.setTo("ads.lotusgroup@gmail.com");
         msg.setSubject("Testing from Spring Boot");
         msg.setText("Hello World from Spring Boot Email");
         this.mailSender.send(msg);
