@@ -10,7 +10,7 @@ services:
     volumes:
       - hrm_mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p26082003"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -25,6 +25,7 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 8081
       DB_PASSWORD: 26082003
       APP_DEFAULT_PASSWORD: Admin@2026
     volumes:
@@ -38,7 +39,7 @@ services:
     container_name: hrm-frontend
     restart: always
     expose:
-      - "3001"
+      - "80"
 
   nginx:
     image: nginx:1.25
