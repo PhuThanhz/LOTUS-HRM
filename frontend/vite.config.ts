@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [react(), tsconfigPaths(), tailwindcss()],
   server: {
     host: true, // cho phép truy cập từ thiết bị khác trong cùng mạng LAN
-    port: 3000,
+    port: 3001,
     strictPort: true, // tránh tự đổi port khi 3000 đang dùng
   },
   css: {

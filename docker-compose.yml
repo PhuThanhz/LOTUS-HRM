@@ -30,7 +30,7 @@ services:
     volumes:
       - backend_uploads:/app/uploads
     expose:
-      - "8080"
+      - "8081"
 
   frontend:
     build:
@@ -38,7 +38,7 @@ services:
     container_name: hrm-frontend
     restart: always
     expose:
-      - "80"
+      - "3001"
 
   nginx:
     image: nginx:1.25
