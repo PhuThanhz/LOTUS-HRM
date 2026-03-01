@@ -19,8 +19,7 @@ public class CorsConfig {
         configuration.setAllowedOrigins(
                 Arrays.asList(
                         "http://localhost:3000",
-                        "http://192.168.2.239:3000",
-                        "http://10.0.2.215:3000"));
+                        "https://hrm.sys.vlotustech.vn"));
 
         // các method nào đc kết nối
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
