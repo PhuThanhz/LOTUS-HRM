@@ -18,7 +18,7 @@ const LoginPage = () => {
 
     useEffect(() => {
         if (isAuthenticated) {
-            window.location.href = "/";
+            window.location.href = "/admin";
         }
     }, [isAuthenticated]);
 
