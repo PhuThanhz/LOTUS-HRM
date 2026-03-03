@@ -972,3 +972,15 @@ export const callIssueJobDescription = (id: number) => {
         `/api/v1/job-descriptions/${id}/issue`
     );
 };
+/* ===================== PERMISSION MATRIX REAL API ===================== */
+export const callFetchPermissionCategoriesByDepartment = (departmentId: number) => {
+    return axios.get<IBackendRes<IPermissionCategory[]>>(
+        `/api/v1/permission-categories/by-department/${departmentId}`
+    );
+};
+
+export const callFetchPermissionMatrixByCategory = (categoryId: number) => {
+    return axios.get<IBackendRes<IPermissionCategoryMatrix>>(
+        `/api/v1/permission-categories/${categoryId}/matrix`
+    );
+};
