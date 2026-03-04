@@ -3,158 +3,250 @@ import {
     Card,
     Col,
     Row,
-    Progress,
     Typography,
     Tag,
-    Button,
     Table,
-    Space,
+    Progress,
+    Space
 } from "antd";
 import {
     BankOutlined,
     ApartmentOutlined,
     TeamOutlined,
+    FileTextOutlined
 } from "@ant-design/icons";
-import { Link } from "react-router-dom";
+import { Pie, Column } from "@ant-design/plots";
 
 const { Title, Text } = Typography;
 
+interface Company {
+    id: string;
+    name: string;
+}
+
+interface DepartmentSetup {
+    organizationChart: boolean;
+    objectives: boolean;
+    permissions: boolean;
+    careerPath: boolean;
+    salaryFramework: boolean;
+    jobMap: boolean;
+}
+
 interface Department {
     key: string;
+    companyId: string;
     name: string;
     unitCount: number;
-    configuredItems: number;
-    totalConfigItems: number;
-    completedProfiles: number;
-    totalProfiles: number;
-    path: string;
+    totalJD: number;
+    completedJD: number;
+    setup: DepartmentSetup;
 }
 
 const DashboardPage = () => {
-    // ===== DỮ LIỆU MẪU =====
-    const totalConfigItems = 7;
-    const configuredItems = 7; // hoàn tất cấu hình
-    const totalProfiles = 5;
-    const completedProfiles = 3;
 
-    const configProgress = Math.round(
-        (configuredItems / totalConfigItems) * 100
-    );
+    /* =========================
+       MOCK DATA
+    ========================= */
 
-    const profileProgress = Math.round(
-        (completedProfiles / totalProfiles) * 100
-    );
+    const companies: Company[] = [
+        { id: "c1", name: "Lotus Holding" }
+    ];
 
     const departments: Department[] = [
         {
-            key: "hr",
+            key: "d1",
+            companyId: "c1",
             name: "Phòng Hành chính - Nhân sự",
             unitCount: 4,
-            configuredItems,
-            totalConfigItems,
-            completedProfiles,
-            totalProfiles,
-            path: "/admin/departments/hr",
-        },
+            totalJD: 4,
+            completedJD: 2,
+            setup: {
+                organizationChart: true,
+                objectives: true,
+                permissions: false,
+                careerPath: true,
+                salaryFramework: false,
+                jobMap: true
+            }
+        }
     ];
 
+    /* =========================
+       KPI
+    ========================= */
+
+    const companyCount = companies.length;
+
+    const departmentCount = departments.length;
+
+    const unitCount = departments.reduce(
+        (sum, d) => sum + d.unitCount,
+        0
+    );
+
+    const totalJD = departments.reduce(
+        (sum, d) => sum + d.totalJD,
+        0
+    );
+
+    const completedJD = departments.reduce(
+        (sum, d) => sum + d.completedJD,
+        0
+    );
+
+    const missingJD = totalJD - completedJD;
+
+    /* =========================
+       SETUP LOGIC
+    ========================= */
+
+    const setupFields = {
+        organizationChart: "Sơ đồ tổ chức",
+        objectives: "Mục tiêu – Nhiệm vụ",
+        permissions: "Phân quyền",
+        careerPath: "Lộ trình thăng tiến",
+        salaryFramework: "Khung lương",
+        jobMap: "Bản đồ chức danh"
+    };
+
+    const totalSetupItems = Object.keys(setupFields).length;
+
+    const getCompletedSetup = (setup: DepartmentSetup) =>
+        Object.values(setup).filter(Boolean).length;
+
+    const getMissingSetup = (setup: DepartmentSetup) => {
+        const missing: string[] = [];
+
+        Object.entries(setupFields).forEach(([key, label]) => {
+            if (!setup[key as keyof DepartmentSetup]) {
+                missing.push(label);
+            }
+        });
+
+        return missing;
+    };
+
+    /* =========================
+       CHART DATA
+    ========================= */
+
+    const jdChartData = [
+        { type: "JD hoàn thành", value: completedJD },
+        { type: "JD còn thiếu", value: missingJD }
+    ];
+
+    const pieConfig = {
+        data: jdChartData,
+        angleField: "value",
+        colorField: "type",
+        innerRadius: 0.6,
+        height: 260,
+        label: false,
+        legend: { position: "bottom" as const }
+    };
+
+    const setupChartData = departments.map(d => ({
+        department: d.name,
+        value: getCompletedSetup(d.setup)
+    }));
+
+    const columnConfig = {
+        data: setupChartData,
+        xField: "department",
+        yField: "value",
+        height: 260,
+        label: {
+            position: "top"
+        }
+    };
+
+    /* =========================
+       TABLE
+    ========================= */
+
     const columns = [
+        {
+            title: "Công ty",
+            dataIndex: "companyId",
+            render: (companyId: string) => {
+                const company = companies.find(c => c.id === companyId);
+                return company?.name;
+            }
+        },
         {
             title: "Phòng ban",
             dataIndex: "name",
             render: (_: any, record: Department) => (
                 <div>
-                    <div style={{ fontWeight: 600, fontSize: 16 }}>
+                    <div style={{ fontWeight: 600 }}>
                         {record.name}
                     </div>
-                    <Text type="secondary" style={{ fontSize: 13 }}>
-                        {record.unitCount} bộ phận trực thuộc
+                    <Text type="secondary">
+                        {record.unitCount} bộ phận
                     </Text>
                 </div>
-            ),
+            )
         },
         {
-            title: "Cấu hình hệ thống",
-            width: 260,
+            title: "Thiết lập",
+            width: 200,
             render: (_: any, record: Department) => {
+
+                const completed = getCompletedSetup(record.setup);
+
                 const percent = Math.round(
-                    (record.configuredItems /
-                        record.totalConfigItems) *
-                    100
+                    (completed / totalSetupItems) * 100
                 );
 
                 return (
-                    <div>
-                        <Progress
-                            percent={percent}
-                            size="small"
-                            status={
-                                percent === 100
-                                    ? "success"
-                                    : "active"
-                            }
-                        />
-                        <div style={{ fontSize: 12, marginTop: 4 }}>
-                            {record.configuredItems}/
-                            {record.totalConfigItems} mục
-                        </div>
-                    </div>
+                    <>
+                        <Progress percent={percent} size="small" />
+                        <Text type="secondary">
+                            {completed}/{totalSetupItems}
+                        </Text>
+                    </>
                 );
-            },
+            }
         },
         {
-            title: "Bộ hồ sơ",
-            width: 260,
+            title: "JD",
+            width: 160,
             render: (_: any, record: Department) => {
+
                 const percent = Math.round(
-                    (record.completedProfiles /
-                        record.totalProfiles) *
-                    100
+                    (record.completedJD / record.totalJD) * 100
                 );
 
                 return (
-                    <div>
-                        <Progress
-                            percent={percent}
-                            size="small"
-                            strokeColor="#1677ff"
-                        />
-                        <div style={{ fontSize: 12, marginTop: 4 }}>
-                            {record.completedProfiles}/
-                            {record.totalProfiles} bộ hoàn thành
-                        </div>
-                    </div>
+                    <>
+                        <Progress percent={percent} size="small" />
+                        <Text type="secondary">
+                            {record.completedJD}/{record.totalJD}
+                        </Text>
+                    </>
                 );
-            },
+            }
         },
         {
-            title: "Trạng thái",
-            width: 150,
+            title: "Thiếu cấu hình",
             render: (_: any, record: Department) => {
-                const percent = Math.round(
-                    (record.configuredItems /
-                        record.totalConfigItems) *
-                    100
-                );
 
-                return percent === 100 ? (
-                    <Tag color="success">Hoàn tất</Tag>
-                ) : (
-                    <Tag color="processing">
-                        Đang cấu hình
-                    </Tag>
+                const missing = getMissingSetup(record.setup);
+
+                return (
+                    <Space wrap>
+                        {missing.length === 0
+                            ? <Tag color="success">Đã hoàn tất</Tag>
+                            : missing.map(item => (
+                                <Tag color="warning" key={item}>
+                                    {item}
+                                </Tag>
+                            ))}
+                    </Space>
                 );
-            },
-        },
-        {
-            title: "",
-            width: 120,
-            render: (_: any, record: Department) => (
-                <Link to={record.path}>
-                    <Button type="link">Xem chi tiết</Button>
-                </Link>
-            ),
-        },
+            }
+        }
     ];
 
     return (
@@ -162,102 +254,89 @@ const DashboardPage = () => {
             style={{
                 padding: 32,
                 background: "#f5f7fa",
-                minHeight: "100vh",
+                minHeight: "100vh"
             }}
         >
-            {/* Header */}
+
             <div style={{ marginBottom: 32 }}>
-                <Title level={2} style={{ marginBottom: 6 }}>
-                    Dashboard
-                </Title>
+                <Title level={2}>Dashboard</Title>
                 <Text type="secondary">
-                    Tổng quan cấu trúc và trạng thái phòng ban
+                    Theo dõi tiến độ thiết lập phòng ban và hồ sơ JD
                 </Text>
             </div>
 
-            {/* KPI */}
+            {/* KPI CARDS */}
+
             <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
-                <Col xs={24} sm={8}>
-                    <Card bordered={false}>
-                        <Space direction="vertical">
-                            <BankOutlined style={{ fontSize: 26 }} />
-                            <Text type="secondary">
-                                Công ty
-                            </Text>
-                            <Title level={3} style={{ margin: 0 }}>
-                                1
-                            </Title>
-                        </Space>
+
+                <Col flex="1">
+                    <Card style={{ height: 120 }}>
+                        <BankOutlined /> Công ty
+                        <Title level={3}>{companyCount}</Title>
                     </Card>
                 </Col>
 
-                <Col xs={24} sm={8}>
-                    <Card bordered={false}>
-                        <Space direction="vertical">
-                            <ApartmentOutlined
-                                style={{ fontSize: 26 }}
-                            />
-                            <Text type="secondary">
-                                Phòng ban
-                            </Text>
-                            <Title level={3} style={{ margin: 0 }}>
-                                1
-                            </Title>
-                        </Space>
+                <Col flex="1">
+                    <Card style={{ height: 120 }}>
+                        <ApartmentOutlined /> Phòng ban
+                        <Title level={3}>{departmentCount}</Title>
                     </Card>
                 </Col>
 
-                <Col xs={24} sm={8}>
-                    <Card bordered={false}>
-                        <Space direction="vertical">
-                            <TeamOutlined
-                                style={{ fontSize: 26 }}
-                            />
-                            <Text type="secondary">
-                                Bộ phận
-                            </Text>
-                            <Title level={3} style={{ margin: 0 }}>
-                                4
-                            </Title>
-                        </Space>
+                <Col flex="1">
+                    <Card style={{ height: 120 }}>
+                        <TeamOutlined /> Bộ phận
+                        <Title level={3}>{unitCount}</Title>
                     </Card>
                 </Col>
+
+                <Col flex="1">
+                    <Card style={{ height: 120 }}>
+                        <FileTextOutlined /> JD hoàn thành
+                        <Title level={3}>{completedJD}</Title>
+                    </Card>
+                </Col>
+
+                <Col flex="1">
+                    <Card style={{ height: 120 }}>
+                        <FileTextOutlined /> JD còn thiếu
+                        <Title level={3}>{missingJD}</Title>
+                    </Card>
+                </Col>
+
             </Row>
 
-            {/* Tổng tiến độ cấu hình */}
-            <Card bordered={false} style={{ marginBottom: 32 }}>
-                <Row align="middle" justify="space-between">
-                    <Col>
-                        <Title level={4} style={{ marginBottom: 4 }}>
-                            Tiến độ cấu hình phòng ban
-                        </Title>
-                        <Text type="secondary">
-                            7/7 mục đã cấu hình
-                        </Text>
-                    </Col>
-                    <Col>
-                        <Progress
-                            type="circle"
-                            percent={configProgress}
-                            width={120}
-                            status="success"
-                        />
-                    </Col>
-                </Row>
-            </Card>
+            {/* CHART */}
 
-            {/* Bảng phòng ban */}
-            <Card bordered={false}>
-                <Title level={4} style={{ marginBottom: 20 }}>
-                    Danh sách phòng ban
-                </Title>
+            <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
+
+                <Col xs={24} md={12}>
+                    <Card title="Tình trạng hồ sơ JD">
+                        <Pie {...pieConfig} />
+                    </Card>
+                </Col>
+
+                <Col xs={24} md={12}>
+                    <Card title="Tiến độ thiết lập cấu hình phòng ban">
+                        <Column {...columnConfig} />
+                    </Card>
+                </Col>
+
+            </Row>
+
+            {/* TABLE */}
+
+            <Card title="Chi tiết tiến độ phòng ban">
+
                 <Table
                     columns={columns}
                     dataSource={departments}
-                    pagination={false}
                     rowKey="key"
+                    pagination={false}
                 />
+
             </Card>
+
         </div>
     );
 };
