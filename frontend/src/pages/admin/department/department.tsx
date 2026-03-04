@@ -28,8 +28,10 @@ import {
 } from "@/hooks/useDepartments";
 import ModalDepartment from "./modal.department";
 import ViewDepartment from "./view.department";
-import PermissionViewModal from "./permissions/ components/PermissionViewModal"; // giữ nguyên vì đã có thật
+import PermissionViewModal from "./permissions/ components/PermissionViewModal";
 
+// Import component Bảng đồ chức danh (đã có mock data thật)
+import PositionChartModal from "@/pages/admin/department/position-chart/PositionChartModal";
 const { Title } = Typography;
 
 const DepartmentPage = () => {
@@ -185,15 +187,7 @@ const DepartmentPage = () => {
                                         setOpenPermissionModal(true);
                                     },
                                 },
-                                {
-                                    key: "process-category",
-                                    icon: <FileTextOutlined style={{ color: "#eb2f96" }} />,
-                                    label: "Danh mục quy trình",
-                                    onClick: () => {
-                                        setSelectedDepartment({ id: record.id!, name: record.name });
-                                        setOpenProcessCategoryModal(true);
-                                    },
-                                },
+
                                 {
                                     key: "career-paths",
                                     icon: <RiseOutlined style={{ color: "#eb2f96" }} />,
@@ -263,30 +257,17 @@ const DepartmentPage = () => {
         },
     ];
 
-    // Mock data tạm cho 2 modal
+    // Mock tạm cho Danh mục quy trình (giữ nguyên vì chưa có component riêng)
     const mockProcessCategories = [
         { key: "1", code: "QC001", name: "Quy trình tuyển dụng", status: "Hoạt động" },
         { key: "2", code: "QC002", name: "Quy trình nghỉ phép", status: "Hoạt động" },
         { key: "3", code: "QC003", name: "Quy trình đánh giá KPI", status: "Nháp" },
     ];
 
-    const mockPositions = [
-        { key: "1", code: "CD01", name: "Trưởng phòng", reportsTo: "Giám đốc", headcount: 1 },
-        { key: "2", code: "CD02", name: "Nhân viên kinh doanh", reportsTo: "Trưởng phòng", headcount: 10 },
-        { key: "3", code: "CD03", name: "Chuyên viên marketing", reportsTo: "Trưởng phòng", headcount: 5 },
-    ];
-
     const processColumns = [
         { title: "Mã quy trình", dataIndex: "code", key: "code" },
         { title: "Tên quy trình", dataIndex: "name", key: "name" },
         { title: "Trạng thái", dataIndex: "status", key: "status" },
-    ];
-
-    const positionColumns = [
-        { title: "Mã chức danh", dataIndex: "code", key: "code" },
-        { title: "Tên chức danh", dataIndex: "name", key: "name" },
-        { title: "Báo cáo cho", dataIndex: "reportsTo", key: "reportsTo" },
-        { title: "Số lượng", dataIndex: "headcount", key: "headcount" },
     ];
 
     return (
@@ -351,33 +332,36 @@ const DepartmentPage = () => {
                     open={openPermissionModal}
                     onClose={() => setOpenPermissionModal(false)}
                     departmentName={selectedDepartment.name}
-                // departmentId={selectedDepartment.id} // nếu cần
                 />
             )}
 
             {/* Modal tạm cho Danh mục quy trình */}
             <Modal
-                title={`Danh mục quy trình - ${selectedDepartment?.name || ""}`}
+                title={`Danh mục quy trình - ${selectedDepartment?.name || "Chưa chọn"}`}
                 open={openProcessCategoryModal}
                 onCancel={() => setOpenProcessCategoryModal(false)}
                 footer={null}
                 width={800}
             >
-                <Title level={5}>Danh sách quy trình</Title>
-                <Table columns={processColumns} dataSource={mockProcessCategories} pagination={false} />
+                <Title level={5} style={{ marginBottom: 16 }}>
+                    Danh sách quy trình
+                </Title>
+                <Table
+                    columns={processColumns}
+                    dataSource={mockProcessCategories}
+                    pagination={false}
+                    bordered
+                />
             </Modal>
 
-            {/* Modal tạm cho Bảng đồ chức danh */}
-            <Modal
-                title={`Bảng đồ chức danh - ${selectedDepartment?.name || ""}`}
-                open={openPositionChartModal}
-                onCancel={() => setOpenPositionChartModal(false)}
-                footer={null}
-                width={900}
-            >
-                <Title level={5}>Danh sách chức danh</Title>
-                <Table columns={positionColumns} dataSource={mockPositions} pagination={false} />
-            </Modal>
+            {/* Modal Bảng đồ chức danh - Sử dụng component riêng (load dữ liệu thật) */}
+            {selectedDepartment && (
+                <PositionChartModal
+                    open={openPositionChartModal}
+                    onClose={() => setOpenPositionChartModal(false)}
+                    departmentName={selectedDepartment.name}
+                />
+            )}
         </PageContainer>
     );
 };
