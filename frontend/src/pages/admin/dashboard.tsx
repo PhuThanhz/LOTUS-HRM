@@ -1,491 +1,410 @@
-import { Card, Col, Row, Statistic, Typography } from "antd";
-import CountUp from "react-countup";
-import { useAppSelector } from "@/redux/hooks";
-import { ALL_PERMISSIONS } from "@/config/permissions";
+import React from "react";
 import {
-    UserOutlined,
-    SafetyOutlined,
-    KeyOutlined,
-    RiseOutlined,
+    Card,
+    Col,
+    Row,
+    Progress,
+    Typography,
+    Tag,
+    Button,
+    Table,
+} from "antd";
+import {
+    BankOutlined,
+    ApartmentOutlined,
     TeamOutlined,
-    TrophyOutlined
+    DollarOutlined,
+    UsergroupAddOutlined,
+    TrophyOutlined,
+    UserOutlined,
 } from "@ant-design/icons";
+import CountUp from "react-countup";
+import { Link } from "react-router-dom";
 
 const { Title, Text } = Typography;
 
+interface DeptItem {
+    key: string;
+    title: string;
+    subtitle: string;
+    icon: React.ReactNode;
+    configuredItems: number;
+    totalItems: number;
+    progress: number;
+    status: "done" | "partial" | "pending";
+    path: string;
+}
+
 const DashboardPage = () => {
-    const permissions = useAppSelector((s) => s.account.user.role.permissions);
+    // Dữ liệu giả lập - sau này lấy từ API
+    const departments: DeptItem[] = [
+        {
+            key: "hanh-chinh",
+            title: "Hành chính",
+            subtitle: "Quản lý văn phòng, hồ sơ, nội quy, tài sản...",
+            icon: <ApartmentOutlined style={{ fontSize: 28, color: "#1890ff" }} />,
+            configuredItems: 8,
+            totalItems: 8,
+            progress: 100,
+            status: "done",
+            path: "/admin/departments/admin",
+        },
+        {
+            key: "c-b",
+            title: "C&B",
+            subtitle: "Lương thưởng, phúc lợi, BHXH, thuế TNCN...",
+            icon: <DollarOutlined style={{ fontSize: 28, color: "#52c41a" }} />,
+            configuredItems: 5,
+            totalItems: 9,
+            progress: 56,
+            status: "partial",
+            path: "/admin/departments/cb",
+        },
+        {
+            key: "tuyen-dung",
+            title: "Tuyển dụng",
+            subtitle: "Nguồn ứng viên, quy trình tuyển, offer letter...",
+            icon: <UsergroupAddOutlined style={{ fontSize: 28, color: "#fa8c16" }} />,
+            configuredItems: 3,
+            totalItems: 8,
+            progress: 38,
+            status: "partial",
+            path: "/admin/departments/recruitment",
+        },
+        {
+            key: "dao-tao",
+            title: "Đào tạo & PTNL",
+            subtitle: "Chương trình đào tạo, đánh giá năng lực, kế hoạch phát triển...",
+            icon: <TrophyOutlined style={{ fontSize: 28, color: "#722ed1" }} />,
+            configuredItems: 6,
+            totalItems: 7,
+            progress: 86,
+            status: "partial",
+            path: "/admin/departments/training",
+        },
+    ];
 
-    const hasAccess =
-        permissions?.some(
-            (p: any) =>
-                p.apiPath === ALL_PERMISSIONS.DASHBOARD.GET_OVERVIEW.apiPath &&
-                p.method === ALL_PERMISSIONS.DASHBOARD.GET_OVERVIEW.method &&
-                p.module === ALL_PERMISSIONS.DASHBOARD.GET_OVERVIEW.module
-        ) || import.meta.env.VITE_ACL_ENABLE === "false";
-
-    const mockData = {
-        userCount: 1280,
-        roleCount: 14,
-        permissionCount: 56,
-    };
-
-    const formatter = (value: number | string) => (
-        <CountUp end={Number(value)} separator="," />
+    const totalDepartments = departments.length;
+    const completedDepts = departments.filter((d) => d.status === "done").length;
+    const overallProgress = Math.round(
+        departments.reduce((sum, d) => sum + d.progress, 0) / totalDepartments
     );
 
-    if (!hasAccess) {
-        return (
-            <div
-                style={{
-                    minHeight: "calc(100vh - 100px)",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    background: "linear-gradient(135deg, #fff 0%, #fdf2f8 50%, #fce7f3 100%)",
-                    borderRadius: "24px",
-                    padding: "60px 40px",
-                    position: "relative",
-                    overflow: "hidden",
-                }}
-            >
-                {/* Decorative background elements */}
-                <div
-                    style={{
-                        position: "absolute",
-                        top: "-100px",
-                        right: "-100px",
-                        width: "400px",
-                        height: "400px",
-                        background: "radial-gradient(circle, rgba(236, 72, 153, 0.08) 0%, transparent 70%)",
-                        borderRadius: "50%",
-                        pointerEvents: "none",
-                    }}
-                />
-                <div
-                    style={{
-                        position: "absolute",
-                        bottom: "-150px",
-                        left: "-150px",
-                        width: "500px",
-                        height: "500px",
-                        background: "radial-gradient(circle, rgba(244, 114, 182, 0.06) 0%, transparent 70%)",
-                        borderRadius: "50%",
-                        pointerEvents: "none",
-                    }}
-                />
-
-                {/* Floating particles effect */}
-                <div
-                    className="particle"
-                    style={{
-                        position: "absolute",
-                        top: "20%",
-                        left: "15%",
-                        width: "8px",
-                        height: "8px",
-                        background: "linear-gradient(135deg, #ec4899 0%, #f472b6 100%)",
-                        borderRadius: "50%",
-                        opacity: 0.3,
-                        animation: "float 6s ease-in-out infinite",
-                    }}
-                />
-                <div
-                    className="particle"
-                    style={{
-                        position: "absolute",
-                        top: "60%",
-                        right: "20%",
-                        width: "12px",
-                        height: "12px",
-                        background: "linear-gradient(135deg, #f472b6 0%, #fbcfe8 100%)",
-                        borderRadius: "50%",
-                        opacity: 0.25,
-                        animation: "float 8s ease-in-out infinite 1s",
-                    }}
-                />
-                <div
-                    className="particle"
-                    style={{
-                        position: "absolute",
-                        bottom: "25%",
-                        left: "25%",
-                        width: "10px",
-                        height: "10px",
-                        background: "linear-gradient(135deg, #fbcfe8 0%, #f9a8d4 100%)",
-                        borderRadius: "50%",
-                        opacity: 0.2,
-                        animation: "float 7s ease-in-out infinite 2s",
-                    }}
-                />
-
-                {/* Logo with premium styling */}
-                <div
-                    style={{
-                        position: "relative",
-                        marginBottom: "32px",
-                        animation: "fadeInScale 0.8s ease-out",
-                    }}
-                >
-                    <div
-                        style={{
-                            width: "140px",
-                            height: "140px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            background: "linear-gradient(135deg, rgba(236, 72, 153, 0.08) 0%, rgba(244, 114, 182, 0.05) 100%)",
-                            borderRadius: "50%",
-                            padding: "20px",
-                            boxShadow: "0 8px 32px rgba(236, 72, 153, 0.15), 0 0 0 1px rgba(236, 72, 153, 0.1)",
-                            position: "relative",
-                            zIndex: 1,
-                        }}
-                    >
-                        <img
-                            src="/logo/LOGOFINAL.png"
-                            alt="LOTUS HRM"
-                            style={{
-                                width: "100%",
-                                height: "auto",
-                                objectFit: "contain",
-                            }}
-                        />
+    const columns = [
+        {
+            title: "Bộ phận",
+            dataIndex: "title",
+            render: (_: any, record: DeptItem) => (
+                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                    {record.icon}
+                    <div>
+                        <div style={{ fontWeight: 600, fontSize: 16 }}>{record.title}</div>
+                        <Text type="secondary" style={{ fontSize: 13 }}>
+                            {record.subtitle}
+                        </Text>
                     </div>
-                    {/* Pulsing ring effect */}
-                    <div
-                        style={{
-                            position: "absolute",
-                            inset: "-12px",
-                            borderRadius: "50%",
-                            border: "2px solid rgba(236, 72, 153, 0.2)",
-                            animation: "pulse-ring 3s ease-out infinite",
-                        }}
-                    />
                 </div>
-
-                {/* Welcome text */}
-                <Title
-                    level={1}
-                    style={{
-                        textAlign: "center",
-                        marginBottom: "16px",
-                        background: "linear-gradient(135deg, #ec4899 0%, #f472b6 100%)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                        fontSize: "42px",
-                        fontWeight: 800,
-                        letterSpacing: "-0.5px",
-                        animation: "fadeInUp 0.8s ease-out 0.2s both",
-                    }}
-                >
-                    Chào mừng đến với LOTUS HRM
-                </Title>
-
-                <Text
-                    style={{
-                        fontSize: "18px",
-                        color: "#ec4899",
-                        textAlign: "center",
-                        fontWeight: 500,
-                        letterSpacing: "0.3px",
-                        animation: "fadeInUp 0.8s ease-out 0.4s both",
-                    }}
-                >
-                    Bộ hồ sơ quản trị nhân sự
-                </Text>
-
-                {/* Subtle tagline */}
-                <Text
-                    type="secondary"
-                    style={{
-                        fontSize: "14px",
-                        textAlign: "center",
-                        marginTop: "8px",
-                        opacity: 0.7,
-                        animation: "fadeInUp 0.8s ease-out 0.6s both",
-                    }}
-                >
-                    Hệ thống quản lý nhân sự tiện dụng & hiện đại
-                </Text>
-
-                {/* Decorative divider */}
-                <div
-                    style={{
-                        marginTop: "32px",
-                        width: "120px",
-                        height: "4px",
-                        background: "linear-gradient(90deg, transparent 0%, #ec4899 50%, transparent 100%)",
-                        borderRadius: "2px",
-                        animation: "fadeIn 0.8s ease-out 0.8s both",
-                    }}
-                />
-
-                {/* Animation styles */}
-                <style>{`
-                    @keyframes fadeInScale {
-                        from {
-                            opacity: 0;
-                            transform: scale(0.8);
-                        }
-                        to {
-                            opacity: 1;
-                            transform: scale(1);
-                        }
-                    }
-
-                    @keyframes fadeInUp {
-                        from {
-                            opacity: 0;
-                            transform: translateY(20px);
-                        }
-                        to {
-                            opacity: 1;
-                            transform: translateY(0);
-                        }
-                    }
-
-                    @keyframes fadeIn {
-                        from {
-                            opacity: 0;
-                        }
-                        to {
-                            opacity: 1;
-                        }
-                    }
-
-                    @keyframes pulse-ring {
-                        0% {
-                            transform: scale(1);
-                            opacity: 0.5;
-                        }
-                        50% {
-                            transform: scale(1.1);
-                            opacity: 0.2;
-                        }
-                        100% {
-                            transform: scale(1.2);
-                            opacity: 0;
-                        }
-                    }
-
-                    @keyframes float {
-                        0%, 100% {
-                            transform: translateY(0) translateX(0);
-                        }
-                        33% {
-                            transform: translateY(-20px) translateX(10px);
-                        }
-                        66% {
-                            transform: translateY(-10px) translateX(-10px);
-                        }
-                    }
-                `}</style>
-            </div>
-        );
-    }
-
-    const statsConfig = [
-        {
-            title: "Tổng người dùng",
-            value: mockData.userCount,
-            icon: <TeamOutlined style={{ fontSize: "32px" }} />,
-            gradient: "linear-gradient(135deg, #ec4899 0%, #f472b6 100%)",
-            bgGradient: "linear-gradient(135deg, rgba(236, 72, 153, 0.08) 0%, rgba(244, 114, 182, 0.05) 100%)",
+            ),
         },
         {
-            title: "Tổng vai trò",
-            value: mockData.roleCount,
-            icon: <TrophyOutlined style={{ fontSize: "32px" }} />,
-            gradient: "linear-gradient(135deg, #f472b6 0%, #f9a8d4 100%)",
-            bgGradient: "linear-gradient(135deg, rgba(244, 114, 182, 0.08) 0%, rgba(249, 168, 212, 0.05) 100%)",
+            title: "Tiến độ cấu hình",
+            dataIndex: "progress",
+            width: 240,
+            render: (progress: number, record: DeptItem) => (
+                <div>
+                    <Progress
+                        percent={progress}
+                        size="small"
+                        strokeColor={
+                            progress === 100
+                                ? "#52c41a"
+                                : progress >= 50
+                                    ? "#faad14"
+                                    : "#ff4d4f"
+                        }
+                    />
+                    <div style={{ fontSize: 12, marginTop: 4, color: "#6b7280" }}>
+                        {record.configuredItems} / {record.totalItems} mục đã hoàn tất
+                    </div>
+                </div>
+            ),
         },
         {
-            title: "Tổng quyền hạn",
-            value: mockData.permissionCount,
-            icon: <KeyOutlined style={{ fontSize: "32px" }} />,
-            gradient: "linear-gradient(135deg, #f9a8d4 0%, #fbcfe8 100%)",
-            bgGradient: "linear-gradient(135deg, rgba(249, 168, 212, 0.08) 0%, rgba(251, 207, 232, 0.05) 100%)",
+            title: "Trạng thái",
+            dataIndex: "status",
+            width: 140,
+            render: (status: string) =>
+                status === "done" ? (
+                    <Tag color="success" style={{ borderRadius: 6, padding: "4px 12px" }}>
+                        Hoàn tất
+                    </Tag>
+                ) : status === "partial" ? (
+                    <Tag color="warning" style={{ borderRadius: 6, padding: "4px 12px" }}>
+                        Đang thực hiện
+                    </Tag>
+                ) : (
+                    <Tag color="default" style={{ borderRadius: 6, padding: "4px 12px" }}>
+                        Chưa bắt đầu
+                    </Tag>
+                ),
+        },
+        {
+            title: "",
+            key: "action",
+            width: 100,
+            render: (_: any, record: DeptItem) => (
+                <Link to={record.path}>
+                    <Button type="link">Chi tiết</Button>
+                </Link>
+            ),
         },
     ];
 
     return (
-        <div style={{ position: "relative" }}>
-            {/* Header section */}
-            <div
-                style={{
-                    marginBottom: "32px",
-                    padding: "32px",
-                    background: "linear-gradient(135deg, #fff 0%, #fdf2f8 50%, #fce7f3 100%)",
-                    borderRadius: "24px",
-                    boxShadow: "0 4px 20px rgba(236, 72, 153, 0.08)",
-                    position: "relative",
-                    overflow: "hidden",
-                }}
-            >
-                {/* Background decoration */}
-                <div
-                    style={{
-                        position: "absolute",
-                        top: "-50px",
-                        right: "-50px",
-                        width: "200px",
-                        height: "200px",
-                        background: "radial-gradient(circle, rgba(236, 72, 153, 0.06) 0%, transparent 70%)",
-                        borderRadius: "50%",
-                        pointerEvents: "none",
-                    }}
-                />
+        <div style={{ padding: "32px", background: "#f0f2f5", minHeight: "100vh" }}>
+            <style>{`
+        .custom-card {
+          border-radius: 16px;
+          border: 1px solid #e8f0fe;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+          transition: all 0.3s;
+        }
+        .custom-card:hover {
+          box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+          transform: translateY(-2px);
+        }
+        .section-title {
+          font-weight: 700;
+          color: #1f2937;
+          margin-bottom: 20px;
+        }
+      `}</style>
 
-                <div style={{ position: "relative", zIndex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "12px" }}>
-                        <div
-                            style={{
-                                width: "56px",
-                                height: "56px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                background: "linear-gradient(135deg, rgba(236, 72, 153, 0.08) 0%, rgba(244, 114, 182, 0.05) 100%)",
-                                borderRadius: "16px",
-                                padding: "12px",
-                                boxShadow: "0 4px 12px rgba(236, 72, 153, 0.12)",
-                            }}
-                        >
-                            <img
-                                src="/logo/LOGOFINAL.png"
-                                alt="LOTUS"
-                                style={{ width: "100%", height: "auto" }}
-                            />
-                        </div>
-                        <div>
-                            <Title
-                                level={2}
-                                style={{
-                                    margin: 0,
-                                    background: "linear-gradient(135deg, #ec4899 0%, #f472b6 100%)",
-                                    WebkitBackgroundClip: "text",
-                                    WebkitTextFillColor: "transparent",
-                                    backgroundClip: "text",
-                                    fontSize: "28px",
-                                    fontWeight: 700,
-                                }}
-                            >
-                                Tổng quan hệ thống
-                            </Title>
-                            <Text style={{ color: "#f472b6", fontSize: "14px", fontWeight: 500 }}>
-                                Bộ hồ sơ quản trị nhân sự
-                            </Text>
-                        </div>
-                    </div>
-                </div>
+            {/* Header */}
+            <div style={{ marginBottom: 32 }}>
+                <Title level={2} style={{ color: "#111827", fontWeight: 700 }}>
+                    Dashboard Tổng quan
+                </Title>
+                <Text type="secondary" style={{ fontSize: 15 }}>
+                    Theo dõi số lượng công ty, phòng ban, bộ phận & trạng thái cấu hình các mục
+                </Text>
             </div>
 
-            {/* Statistics cards */}
-            <Row gutter={[24, 24]}>
-                {statsConfig.map((stat, index) => (
-                    <Col span={24} md={8} key={index}>
-                        <Card
-                            bordered={false}
-                            style={{
-                                borderRadius: "20px",
-                                background: stat.bgGradient,
-                                border: "1px solid rgba(236, 72, 153, 0.1)",
-                                boxShadow: "0 4px 20px rgba(236, 72, 153, 0.08)",
-                                overflow: "hidden",
-                                position: "relative",
-                                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                            }}
-                            className="stat-card"
-                            hoverable
-                        >
-                            {/* Card decoration */}
+            {/* KPI Cards */}
+            <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
+                <Col xs={24} sm={12} lg={6}>
+                    <Card className="custom-card">
+                        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                             <div
                                 style={{
-                                    position: "absolute",
-                                    top: "-30px",
-                                    right: "-30px",
-                                    width: "120px",
-                                    height: "120px",
-                                    background: "radial-gradient(circle, rgba(236, 72, 153, 0.08) 0%, transparent 70%)",
-                                    borderRadius: "50%",
-                                    pointerEvents: "none",
+                                    width: 56,
+                                    height: 56,
+                                    background: "#e6f7ff",
+                                    borderRadius: 12,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
                                 }}
-                            />
-
-                            <div style={{ position: "relative", zIndex: 1 }}>
-                                <div
-                                    style={{
-                                        marginBottom: "16px",
-                                        display: "inline-flex",
-                                        padding: "12px",
-                                        borderRadius: "14px",
-                                        background: "rgba(255, 255, 255, 0.6)",
-                                        boxShadow: "0 2px 8px rgba(236, 72, 153, 0.12)",
-                                    }}
-                                >
-                                    <div style={{ background: stat.gradient, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                                        {stat.icon}
-                                    </div>
-                                </div>
-
-                                <Statistic
-                                    title={
-                                        <span style={{
-                                            color: "#ec4899",
-                                            fontSize: "15px",
-                                            fontWeight: 600,
-                                            letterSpacing: "0.3px"
-                                        }}>
-                                            {stat.title}
-                                        </span>
-                                    }
-                                    value={stat.value}
-                                    formatter={formatter}
-                                    valueStyle={{
-                                        background: stat.gradient,
-                                        WebkitBackgroundClip: "text",
-                                        WebkitTextFillColor: "transparent",
-                                        backgroundClip: "text",
-                                        fontSize: "36px",
-                                        fontWeight: 800,
-                                    }}
-                                />
+                            >
+                                <BankOutlined style={{ fontSize: 28, color: "#1890ff" }} />
                             </div>
-                        </Card>
-                    </Col>
-                ))}
+                            <div>
+                                <Text type="secondary" style={{ display: "block", fontSize: 14 }}>
+                                    Công ty
+                                </Text>
+                                <Title level={3} style={{ margin: 0 }}>
+                                    1
+                                </Title>
+                            </div>
+                        </div>
+                    </Card>
+                </Col>
+
+                <Col xs={24} sm={12} lg={6}>
+                    <Card className="custom-card">
+                        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                            <div
+                                style={{
+                                    width: 56,
+                                    height: 56,
+                                    background: "#f0fdf4",
+                                    borderRadius: 12,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <ApartmentOutlined style={{ fontSize: 28, color: "#52c41a" }} />
+                            </div>
+                            <div>
+                                <Text type="secondary" style={{ display: "block", fontSize: 14 }}>
+                                    Phòng ban
+                                </Text>
+                                <Title level={3} style={{ margin: 0 }}>
+                                    1
+                                </Title>
+                            </div>
+                        </div>
+                    </Card>
+                </Col>
+
+                <Col xs={24} sm={12} lg={6}>
+                    <Card className="custom-card">
+                        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                            <div
+                                style={{
+                                    width: 56,
+                                    height: 56,
+                                    background: "#fefce8",
+                                    borderRadius: 12,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <TeamOutlined style={{ fontSize: 28, color: "#facc15" }} />
+                            </div>
+                            <div>
+                                <Text type="secondary" style={{ display: "block", fontSize: 14 }}>
+                                    Bộ phận
+                                </Text>
+                                <Title level={3} style={{ margin: 0 }}>
+                                    {totalDepartments}
+                                </Title>
+                            </div>
+                        </div>
+                    </Card>
+                </Col>
+
+                <Col xs={24} sm={12} lg={6}>
+                    <Card className="custom-card">
+                        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                            <div
+                                style={{
+                                    width: 56,
+                                    height: 56,
+                                    background: "#ecfdf5",
+                                    borderRadius: 12,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <UserOutlined style={{ fontSize: 28, color: "#10b981" }} />
+                            </div>
+                            <div>
+                                <Text type="secondary" style={{ display: "block", fontSize: 14 }}>
+                                    Tổng nhân sự
+                                </Text>
+                                <Title level={3} style={{ margin: 0 }}>
+                                    <CountUp end={31} duration={1.8} />
+                                </Title>
+                            </div>
+                        </div>
+                    </Card>
+                </Col>
             </Row>
 
-            {/* Card hover effects */}
-            <style>{`
-                .stat-card {
-                    animation: fadeInUp 0.6s ease-out both;
-                    animation-delay: calc(var(--index, 0) * 0.1s);
-                }
+            {/* Overall Progress */}
+            <Card className="custom-card" style={{ marginBottom: 32 }}>
+                <Row gutter={32} align="middle">
+                    <Col flex="1">
+                        <Title level={4} className="section-title">
+                            Tiến độ cấu hình các bộ phận
+                        </Title>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                            {departments.map((dept) => (
+                                <div
+                                    key={dept.key}
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 12,
+                                        padding: "8px 0",
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            width: 10,
+                                            height: 10,
+                                            borderRadius: "50%",
+                                            background:
+                                                dept.status === "done"
+                                                    ? "#52c41a"
+                                                    : dept.status === "partial"
+                                                        ? "#faad14"
+                                                        : "#d1d5db",
+                                        }}
+                                    />
+                                    <span
+                                        style={{
+                                            flex: 1,
+                                            fontWeight: dept.status === "done" ? 600 : 400,
+                                        }}
+                                    >
+                                        {dept.title}
+                                    </span>
+                                    <Tag
+                                        color={
+                                            dept.status === "done"
+                                                ? "success"
+                                                : dept.status === "partial"
+                                                    ? "warning"
+                                                    : "default"
+                                        }
+                                        style={{ borderRadius: 6 }}
+                                    >
+                                        {dept.progress}%
+                                    </Tag>
+                                </div>
+                            ))}
+                        </div>
+                    </Col>
 
-                .stat-card:hover {
-                    transform: translateY(-8px);
-                    box-shadow: 0 12px 32px rgba(236, 72, 153, 0.15) !important;
-                }
+                    <Col>
+                        <div style={{ textAlign: "center" }}>
+                            <Progress
+                                type="circle"
+                                percent={overallProgress}
+                                size={140}
+                                strokeColor={{
+                                    "0%": "#1890ff",
+                                    "100%": "#52c41a",
+                                }}
+                                format={(percent) => (
+                                    <div>
+                                        <div
+                                            style={{
+                                                fontSize: 32,
+                                                fontWeight: 700,
+                                                color: "#111827",
+                                            }}
+                                        >
+                                            {percent}%
+                                        </div>
+                                        <div style={{ fontSize: 14, color: "#6b7280" }}>
+                                            hoàn tất
+                                        </div>
+                                    </div>
+                                )}
+                            />
+                        </div>
+                    </Col>
+                </Row>
+            </Card>
 
-                .stat-card:nth-child(1) { --index: 0; }
-                .stat-card:nth-child(2) { --index: 1; }
-                .stat-card:nth-child(3) { --index: 2; }
-
-                @keyframes fadeInUp {
-                    from {
-                        opacity: 0;
-                        transform: translateY(30px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-            `}</style>
+            {/* Departments Table */}
+            <Card className="custom-card">
+                <Title level={4} className="section-title">
+                    Trạng thái cấu hình chi tiết từng bộ phận
+                </Title>
+                <Table
+                    columns={columns}
+                    dataSource={departments}
+                    pagination={false}
+                    rowKey="key"
+                />
+            </Card>
         </div>
     );
 };
