@@ -13,21 +13,15 @@ import {
     BankOutlined,
     ApartmentOutlined,
     TeamOutlined,
-    DollarOutlined,
-    UsergroupAddOutlined,
-    TrophyOutlined,
-    UserOutlined,
 } from "@ant-design/icons";
-import CountUp from "react-countup";
 import { Link } from "react-router-dom";
 
 const { Title, Text } = Typography;
 
-interface DeptItem {
+interface Department {
     key: string;
-    title: string;
-    subtitle: string;
-    icon: React.ReactNode;
+    name: string;
+    unitCount: number; // số bộ phận
     configuredItems: number;
     totalItems: number;
     progress: number;
@@ -36,95 +30,65 @@ interface DeptItem {
 }
 
 const DashboardPage = () => {
-    // Dữ liệu giả lập - sau này lấy từ API
-    const departments: DeptItem[] = [
+    // 1 công ty - 1 phòng ban - 4 bộ phận
+    // Phòng ban có 6 mục cần cấu hình
+
+    const configured = 4;
+    const total = 6;
+    const progress = Math.round((configured / total) * 100);
+
+    const departments: Department[] = [
         {
-            key: "hanh-chinh",
-            title: "Hành chính",
-            subtitle: "Quản lý văn phòng, hồ sơ, nội quy, tài sản...",
-            icon: <ApartmentOutlined style={{ fontSize: 28, color: "#1890ff" }} />,
-            configuredItems: 8,
-            totalItems: 8,
-            progress: 100,
-            status: "done",
-            path: "/admin/departments/admin",
-        },
-        {
-            key: "c-b",
-            title: "C&B",
-            subtitle: "Lương thưởng, phúc lợi, BHXH, thuế TNCN...",
-            icon: <DollarOutlined style={{ fontSize: 28, color: "#52c41a" }} />,
-            configuredItems: 5,
-            totalItems: 9,
-            progress: 56,
-            status: "partial",
-            path: "/admin/departments/cb",
-        },
-        {
-            key: "tuyen-dung",
-            title: "Tuyển dụng",
-            subtitle: "Nguồn ứng viên, quy trình tuyển, offer letter...",
-            icon: <UsergroupAddOutlined style={{ fontSize: 28, color: "#fa8c16" }} />,
-            configuredItems: 3,
-            totalItems: 8,
-            progress: 38,
-            status: "partial",
-            path: "/admin/departments/recruitment",
-        },
-        {
-            key: "dao-tao",
-            title: "Đào tạo & PTNL",
-            subtitle: "Chương trình đào tạo, đánh giá năng lực, kế hoạch phát triển...",
-            icon: <TrophyOutlined style={{ fontSize: 28, color: "#722ed1" }} />,
-            configuredItems: 6,
-            totalItems: 7,
-            progress: 86,
-            status: "partial",
-            path: "/admin/departments/training",
+            key: "hr",
+            name: "Phòng Hành chính - Nhân sự",
+            unitCount: 4,
+            configuredItems: configured,
+            totalItems: total,
+            progress: progress,
+            status:
+                progress === 100
+                    ? "done"
+                    : progress === 0
+                        ? "pending"
+                        : "partial",
+            path: "/admin/departments/hr",
         },
     ];
 
-    const totalDepartments = departments.length;
-    const completedDepts = departments.filter((d) => d.status === "done").length;
-    const overallProgress = Math.round(
-        departments.reduce((sum, d) => sum + d.progress, 0) / totalDepartments
-    );
-
     const columns = [
         {
-            title: "Bộ phận",
-            dataIndex: "title",
-            render: (_: any, record: DeptItem) => (
-                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                    {record.icon}
-                    <div>
-                        <div style={{ fontWeight: 600, fontSize: 16 }}>{record.title}</div>
-                        <Text type="secondary" style={{ fontSize: 13 }}>
-                            {record.subtitle}
-                        </Text>
+            title: "Phòng ban",
+            dataIndex: "name",
+            render: (_: any, record: Department) => (
+                <div>
+                    <div style={{ fontWeight: 600, fontSize: 16 }}>
+                        {record.name}
                     </div>
+                    <Text type="secondary" style={{ fontSize: 13 }}>
+                        {record.unitCount} bộ phận trực thuộc
+                    </Text>
                 </div>
             ),
         },
         {
             title: "Tiến độ cấu hình",
             dataIndex: "progress",
-            width: 240,
-            render: (progress: number, record: DeptItem) => (
+            width: 300,
+            render: (_: any, record: Department) => (
                 <div>
                     <Progress
-                        percent={progress}
+                        percent={record.progress}
                         size="small"
-                        strokeColor={
-                            progress === 100
-                                ? "#52c41a"
-                                : progress >= 50
-                                    ? "#faad14"
-                                    : "#ff4d4f"
+                        status={
+                            record.progress === 100
+                                ? "success"
+                                : record.progress === 0
+                                    ? "exception"
+                                    : "active"
                         }
                     />
-                    <div style={{ fontSize: 12, marginTop: 4, color: "#6b7280" }}>
-                        {record.configuredItems} / {record.totalItems} mục đã hoàn tất
+                    <div style={{ fontSize: 12, marginTop: 4 }}>
+                        {record.configuredItems}/{record.totalItems} mục đã cấu hình
                     </div>
                 </div>
             ),
@@ -132,271 +96,110 @@ const DashboardPage = () => {
         {
             title: "Trạng thái",
             dataIndex: "status",
-            width: 140,
+            width: 160,
             render: (status: string) =>
                 status === "done" ? (
-                    <Tag color="success" style={{ borderRadius: 6, padding: "4px 12px" }}>
-                        Hoàn tất
-                    </Tag>
+                    <Tag color="success">Đã hoàn tất</Tag>
                 ) : status === "partial" ? (
-                    <Tag color="warning" style={{ borderRadius: 6, padding: "4px 12px" }}>
-                        Đang thực hiện
-                    </Tag>
+                    <Tag color="processing">Đang cấu hình</Tag>
                 ) : (
-                    <Tag color="default" style={{ borderRadius: 6, padding: "4px 12px" }}>
-                        Chưa bắt đầu
-                    </Tag>
+                    <Tag>Chưa cấu hình</Tag>
                 ),
         },
         {
             title: "",
             key: "action",
-            width: 100,
-            render: (_: any, record: DeptItem) => (
+            width: 120,
+            render: (_: any, record: Department) => (
                 <Link to={record.path}>
-                    <Button type="link">Chi tiết</Button>
+                    <Button type="link">Cấu hình</Button>
                 </Link>
             ),
         },
     ];
 
     return (
-        <div style={{ padding: "32px", background: "#f0f2f5", minHeight: "100vh" }}>
-            <style>{`
-        .custom-card {
-          border-radius: 16px;
-          border: 1px solid #e8f0fe;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-          transition: all 0.3s;
-        }
-        .custom-card:hover {
-          box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-          transform: translateY(-2px);
-        }
-        .section-title {
-          font-weight: 700;
-          color: #1f2937;
-          margin-bottom: 20px;
-        }
-      `}</style>
-
+        <div
+            style={{
+                padding: 32,
+                background: "#f5f7fa",
+                minHeight: "100vh",
+            }}
+        >
             {/* Header */}
             <div style={{ marginBottom: 32 }}>
-                <Title level={2} style={{ color: "#111827", fontWeight: 700 }}>
-                    Dashboard Tổng quan
+                <Title level={2} style={{ marginBottom: 6 }}>
+                    Dashboard
                 </Title>
-                <Text type="secondary" style={{ fontSize: 15 }}>
-                    Theo dõi số lượng công ty, phòng ban, bộ phận & trạng thái cấu hình các mục
+                <Text type="secondary">
+                    Tổng quan cấu trúc tổ chức và trạng thái cấu hình phòng ban
                 </Text>
             </div>
 
-            {/* KPI Cards */}
+            {/* KPI */}
             <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
-                <Col xs={24} sm={12} lg={6}>
-                    <Card className="custom-card">
-                        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                            <div
-                                style={{
-                                    width: 56,
-                                    height: 56,
-                                    background: "#e6f7ff",
-                                    borderRadius: 12,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                }}
-                            >
-                                <BankOutlined style={{ fontSize: 28, color: "#1890ff" }} />
-                            </div>
-                            <div>
-                                <Text type="secondary" style={{ display: "block", fontSize: 14 }}>
-                                    Công ty
-                                </Text>
-                                <Title level={3} style={{ margin: 0 }}>
-                                    1
-                                </Title>
-                            </div>
+                <Col xs={24} sm={8}>
+                    <Card bordered={false}>
+                        <BankOutlined style={{ fontSize: 26 }} />
+                        <div style={{ marginTop: 12 }}>
+                            <Text type="secondary">Công ty</Text>
+                            <Title level={3} style={{ margin: 0 }}>
+                                1
+                            </Title>
                         </div>
                     </Card>
                 </Col>
 
-                <Col xs={24} sm={12} lg={6}>
-                    <Card className="custom-card">
-                        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                            <div
-                                style={{
-                                    width: 56,
-                                    height: 56,
-                                    background: "#f0fdf4",
-                                    borderRadius: 12,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                }}
-                            >
-                                <ApartmentOutlined style={{ fontSize: 28, color: "#52c41a" }} />
-                            </div>
-                            <div>
-                                <Text type="secondary" style={{ display: "block", fontSize: 14 }}>
-                                    Phòng ban
-                                </Text>
-                                <Title level={3} style={{ margin: 0 }}>
-                                    1
-                                </Title>
-                            </div>
+                <Col xs={24} sm={8}>
+                    <Card bordered={false}>
+                        <ApartmentOutlined style={{ fontSize: 26 }} />
+                        <div style={{ marginTop: 12 }}>
+                            <Text type="secondary">Phòng ban</Text>
+                            <Title level={3} style={{ margin: 0 }}>
+                                1
+                            </Title>
                         </div>
                     </Card>
                 </Col>
 
-                <Col xs={24} sm={12} lg={6}>
-                    <Card className="custom-card">
-                        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                            <div
-                                style={{
-                                    width: 56,
-                                    height: 56,
-                                    background: "#fefce8",
-                                    borderRadius: 12,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                }}
-                            >
-                                <TeamOutlined style={{ fontSize: 28, color: "#facc15" }} />
-                            </div>
-                            <div>
-                                <Text type="secondary" style={{ display: "block", fontSize: 14 }}>
-                                    Bộ phận
-                                </Text>
-                                <Title level={3} style={{ margin: 0 }}>
-                                    {totalDepartments}
-                                </Title>
-                            </div>
-                        </div>
-                    </Card>
-                </Col>
-
-                <Col xs={24} sm={12} lg={6}>
-                    <Card className="custom-card">
-                        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                            <div
-                                style={{
-                                    width: 56,
-                                    height: 56,
-                                    background: "#ecfdf5",
-                                    borderRadius: 12,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                }}
-                            >
-                                <UserOutlined style={{ fontSize: 28, color: "#10b981" }} />
-                            </div>
-                            <div>
-                                <Text type="secondary" style={{ display: "block", fontSize: 14 }}>
-                                    Tổng nhân sự
-                                </Text>
-                                <Title level={3} style={{ margin: 0 }}>
-                                    <CountUp end={31} duration={1.8} />
-                                </Title>
-                            </div>
+                <Col xs={24} sm={8}>
+                    <Card bordered={false}>
+                        <TeamOutlined style={{ fontSize: 26 }} />
+                        <div style={{ marginTop: 12 }}>
+                            <Text type="secondary">Bộ phận</Text>
+                            <Title level={3} style={{ margin: 0 }}>
+                                4
+                            </Title>
                         </div>
                     </Card>
                 </Col>
             </Row>
 
-            {/* Overall Progress */}
-            <Card className="custom-card" style={{ marginBottom: 32 }}>
-                <Row gutter={32} align="middle">
-                    <Col flex="1">
-                        <Title level={4} className="section-title">
-                            Tiến độ cấu hình các bộ phận
-                        </Title>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                            {departments.map((dept) => (
-                                <div
-                                    key={dept.key}
-                                    style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: 12,
-                                        padding: "8px 0",
-                                    }}
-                                >
-                                    <div
-                                        style={{
-                                            width: 10,
-                                            height: 10,
-                                            borderRadius: "50%",
-                                            background:
-                                                dept.status === "done"
-                                                    ? "#52c41a"
-                                                    : dept.status === "partial"
-                                                        ? "#faad14"
-                                                        : "#d1d5db",
-                                        }}
-                                    />
-                                    <span
-                                        style={{
-                                            flex: 1,
-                                            fontWeight: dept.status === "done" ? 600 : 400,
-                                        }}
-                                    >
-                                        {dept.title}
-                                    </span>
-                                    <Tag
-                                        color={
-                                            dept.status === "done"
-                                                ? "success"
-                                                : dept.status === "partial"
-                                                    ? "warning"
-                                                    : "default"
-                                        }
-                                        style={{ borderRadius: 6 }}
-                                    >
-                                        {dept.progress}%
-                                    </Tag>
-                                </div>
-                            ))}
-                        </div>
-                    </Col>
-
+            {/* Tổng tiến độ */}
+            <Card bordered={false} style={{ marginBottom: 32 }}>
+                <Row align="middle" justify="space-between">
                     <Col>
-                        <div style={{ textAlign: "center" }}>
-                            <Progress
-                                type="circle"
-                                percent={overallProgress}
-                                size={140}
-                                strokeColor={{
-                                    "0%": "#1890ff",
-                                    "100%": "#52c41a",
-                                }}
-                                format={(percent) => (
-                                    <div>
-                                        <div
-                                            style={{
-                                                fontSize: 32,
-                                                fontWeight: 700,
-                                                color: "#111827",
-                                            }}
-                                        >
-                                            {percent}%
-                                        </div>
-                                        <div style={{ fontSize: 14, color: "#6b7280" }}>
-                                            hoàn tất
-                                        </div>
-                                    </div>
-                                )}
-                            />
-                        </div>
+                        <Title level={4} style={{ marginBottom: 4 }}>
+                            Tỷ lệ hoàn tất cấu hình
+                        </Title>
+                        <Text type="secondary">
+                            Dựa trên 6 mục cấu hình bắt buộc
+                        </Text>
+                    </Col>
+                    <Col>
+                        <Progress
+                            type="circle"
+                            percent={progress}
+                            width={120}
+                        />
                     </Col>
                 </Row>
             </Card>
 
-            {/* Departments Table */}
-            <Card className="custom-card">
-                <Title level={4} className="section-title">
-                    Trạng thái cấu hình chi tiết từng bộ phận
+            {/* Bảng phòng ban */}
+            <Card bordered={false}>
+                <Title level={4} style={{ marginBottom: 20 }}>
+                    Danh sách phòng ban
                 </Title>
                 <Table
                     columns={columns}
