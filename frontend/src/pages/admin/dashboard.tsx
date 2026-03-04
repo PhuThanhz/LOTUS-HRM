@@ -8,6 +8,7 @@ import {
     Tag,
     Button,
     Table,
+    Space,
 } from "antd";
 import {
     BankOutlined,
@@ -21,36 +22,38 @@ const { Title, Text } = Typography;
 interface Department {
     key: string;
     name: string;
-    unitCount: number; // số bộ phận
+    unitCount: number;
     configuredItems: number;
-    totalItems: number;
-    progress: number;
-    status: "done" | "partial" | "pending";
+    totalConfigItems: number;
+    completedProfiles: number;
+    totalProfiles: number;
     path: string;
 }
 
 const DashboardPage = () => {
-    // 1 công ty - 1 phòng ban - 4 bộ phận
-    // Phòng ban có 6 mục cần cấu hình
+    // ===== DỮ LIỆU MẪU =====
+    const totalConfigItems = 7;
+    const configuredItems = 7; // hoàn tất cấu hình
+    const totalProfiles = 5;
+    const completedProfiles = 3;
 
-    const configured = 4;
-    const total = 6;
-    const progress = Math.round((configured / total) * 100);
+    const configProgress = Math.round(
+        (configuredItems / totalConfigItems) * 100
+    );
+
+    const profileProgress = Math.round(
+        (completedProfiles / totalProfiles) * 100
+    );
 
     const departments: Department[] = [
         {
             key: "hr",
             name: "Phòng Hành chính - Nhân sự",
             unitCount: 4,
-            configuredItems: configured,
-            totalItems: total,
-            progress: progress,
-            status:
-                progress === 100
-                    ? "done"
-                    : progress === 0
-                        ? "pending"
-                        : "partial",
+            configuredItems,
+            totalConfigItems,
+            completedProfiles,
+            totalProfiles,
             path: "/admin/departments/hr",
         },
     ];
@@ -71,48 +74,84 @@ const DashboardPage = () => {
             ),
         },
         {
-            title: "Tiến độ cấu hình",
-            dataIndex: "progress",
-            width: 300,
-            render: (_: any, record: Department) => (
-                <div>
-                    <Progress
-                        percent={record.progress}
-                        size="small"
-                        status={
-                            record.progress === 100
-                                ? "success"
-                                : record.progress === 0
-                                    ? "exception"
+            title: "Cấu hình hệ thống",
+            width: 260,
+            render: (_: any, record: Department) => {
+                const percent = Math.round(
+                    (record.configuredItems /
+                        record.totalConfigItems) *
+                    100
+                );
+
+                return (
+                    <div>
+                        <Progress
+                            percent={percent}
+                            size="small"
+                            status={
+                                percent === 100
+                                    ? "success"
                                     : "active"
-                        }
-                    />
-                    <div style={{ fontSize: 12, marginTop: 4 }}>
-                        {record.configuredItems}/{record.totalItems} mục đã cấu hình
+                            }
+                        />
+                        <div style={{ fontSize: 12, marginTop: 4 }}>
+                            {record.configuredItems}/
+                            {record.totalConfigItems} mục
+                        </div>
                     </div>
-                </div>
-            ),
+                );
+            },
+        },
+        {
+            title: "Bộ hồ sơ",
+            width: 260,
+            render: (_: any, record: Department) => {
+                const percent = Math.round(
+                    (record.completedProfiles /
+                        record.totalProfiles) *
+                    100
+                );
+
+                return (
+                    <div>
+                        <Progress
+                            percent={percent}
+                            size="small"
+                            strokeColor="#1677ff"
+                        />
+                        <div style={{ fontSize: 12, marginTop: 4 }}>
+                            {record.completedProfiles}/
+                            {record.totalProfiles} bộ hoàn thành
+                        </div>
+                    </div>
+                );
+            },
         },
         {
             title: "Trạng thái",
-            dataIndex: "status",
-            width: 160,
-            render: (status: string) =>
-                status === "done" ? (
-                    <Tag color="success">Đã hoàn tất</Tag>
-                ) : status === "partial" ? (
-                    <Tag color="processing">Đang cấu hình</Tag>
+            width: 150,
+            render: (_: any, record: Department) => {
+                const percent = Math.round(
+                    (record.configuredItems /
+                        record.totalConfigItems) *
+                    100
+                );
+
+                return percent === 100 ? (
+                    <Tag color="success">Hoàn tất</Tag>
                 ) : (
-                    <Tag>Chưa cấu hình</Tag>
-                ),
+                    <Tag color="processing">
+                        Đang cấu hình
+                    </Tag>
+                );
+            },
         },
         {
             title: "",
-            key: "action",
             width: 120,
             render: (_: any, record: Department) => (
                 <Link to={record.path}>
-                    <Button type="link">Cấu hình</Button>
+                    <Button type="link">Xem chi tiết</Button>
                 </Link>
             ),
         },
@@ -132,7 +171,7 @@ const DashboardPage = () => {
                     Dashboard
                 </Title>
                 <Text type="secondary">
-                    Tổng quan cấu trúc tổ chức và trạng thái cấu hình phòng ban
+                    Tổng quan cấu trúc và trạng thái phòng ban
                 </Text>
             </div>
 
@@ -140,57 +179,68 @@ const DashboardPage = () => {
             <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
                 <Col xs={24} sm={8}>
                     <Card bordered={false}>
-                        <BankOutlined style={{ fontSize: 26 }} />
-                        <div style={{ marginTop: 12 }}>
-                            <Text type="secondary">Công ty</Text>
+                        <Space direction="vertical">
+                            <BankOutlined style={{ fontSize: 26 }} />
+                            <Text type="secondary">
+                                Công ty
+                            </Text>
                             <Title level={3} style={{ margin: 0 }}>
                                 1
                             </Title>
-                        </div>
+                        </Space>
                     </Card>
                 </Col>
 
                 <Col xs={24} sm={8}>
                     <Card bordered={false}>
-                        <ApartmentOutlined style={{ fontSize: 26 }} />
-                        <div style={{ marginTop: 12 }}>
-                            <Text type="secondary">Phòng ban</Text>
+                        <Space direction="vertical">
+                            <ApartmentOutlined
+                                style={{ fontSize: 26 }}
+                            />
+                            <Text type="secondary">
+                                Phòng ban
+                            </Text>
                             <Title level={3} style={{ margin: 0 }}>
                                 1
                             </Title>
-                        </div>
+                        </Space>
                     </Card>
                 </Col>
 
                 <Col xs={24} sm={8}>
                     <Card bordered={false}>
-                        <TeamOutlined style={{ fontSize: 26 }} />
-                        <div style={{ marginTop: 12 }}>
-                            <Text type="secondary">Bộ phận</Text>
+                        <Space direction="vertical">
+                            <TeamOutlined
+                                style={{ fontSize: 26 }}
+                            />
+                            <Text type="secondary">
+                                Bộ phận
+                            </Text>
                             <Title level={3} style={{ margin: 0 }}>
                                 4
                             </Title>
-                        </div>
+                        </Space>
                     </Card>
                 </Col>
             </Row>
 
-            {/* Tổng tiến độ */}
+            {/* Tổng tiến độ cấu hình */}
             <Card bordered={false} style={{ marginBottom: 32 }}>
                 <Row align="middle" justify="space-between">
                     <Col>
                         <Title level={4} style={{ marginBottom: 4 }}>
-                            Tỷ lệ hoàn tất cấu hình
+                            Tiến độ cấu hình phòng ban
                         </Title>
                         <Text type="secondary">
-                            Dựa trên 6 mục cấu hình bắt buộc
+                            7/7 mục đã cấu hình
                         </Text>
                     </Col>
                     <Col>
                         <Progress
                             type="circle"
-                            percent={progress}
+                            percent={configProgress}
                             width={120}
+                            status="success"
                         />
                     </Col>
                 </Row>
