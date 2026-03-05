@@ -26,11 +26,25 @@ interface Department {
     setup: DepartmentSetup;
 }
 
-/* ── inline style overrides (minimal, no font injection) ── */
+/* ── inline style overrides ── */
 const S = `
-  .db-grid        { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; margin-bottom: 24px; }
-  .db-chart-grid  { display: grid; grid-template-columns: 5fr 7fr; gap: 12px; margin-bottom: 24px; }
+  /* ── KPI Grid ── */
+  .db-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
 
+  /* ── Chart Grid ── */
+  .db-chart-grid {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  /* ── KPI Card ── */
   .db-kpi {
     background: #fff;
     border-radius: 14px;
@@ -39,14 +53,16 @@ const S = `
     box-shadow: 0 1px 4px rgba(0,0,0,.04);
     transition: box-shadow .18s, transform .18s;
     cursor: default;
+    min-width: 0;
   }
   .db-kpi:hover { box-shadow: 0 4px 16px rgba(0,0,0,.07); transform: translateY(-1px); }
 
   .db-kpi-top    { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-  .db-kpi-icon   { width: 32px; height: 32px; border-radius: 8px; background: #fff0f4; display: flex; align-items: center; justify-content: center; color: #f2547d; }
-  .db-kpi-label  { font-size: 12px; color: #8c8c8c; margin-bottom: 4px; }
-  .db-kpi-num    { font-size: 30px; font-weight: 700; color: #1a1a1a; letter-spacing: -.03em; line-height: 1; }
+  .db-kpi-icon   { width: 32px; height: 32px; border-radius: 8px; background: #fff0f4; display: flex; align-items: center; justify-content: center; color: #f2547d; flex-shrink: 0; }
+  .db-kpi-label  { font-size: 12px; color: #8c8c8c; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .db-kpi-num    { font-size: 28px; font-weight: 700; color: #1a1a1a; letter-spacing: -.03em; line-height: 1; }
 
+  /* ── Generic Card ── */
   .db-card {
     background: #fff;
     border-radius: 14px;
@@ -58,15 +74,18 @@ const S = `
     padding: 14px 20px;
     border-bottom: 1px solid #f5f5f5;
     display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
   }
   .db-card-title { font-size: 13px; font-weight: 600; color: #262626; }
   .db-card-badge {
     font-size: 11px; font-weight: 600;
     background: #fff0f4; color: #f2547d;
     border-radius: 20px; padding: 2px 9px;
+    white-space: nowrap;
   }
   .db-card-body  { padding: 16px 20px; }
 
+  /* ── Table overrides ── */
   .db-table .ant-table-thead > tr > th {
     background: #fafafa !important;
     font-size: 11px !important;
@@ -75,6 +94,7 @@ const S = `
     letter-spacing: .05em !important;
     color: #bfbfbf !important;
     border-bottom: 1px solid #f0f0f0 !important;
+    white-space: nowrap;
   }
   .db-table .ant-table-tbody > tr > td {
     border-bottom: 1px solid #f5f5f5 !important;
@@ -85,6 +105,10 @@ const S = `
   .db-table .ant-progress-inner { background: #f5f5f5 !important; border-radius: 99px !important; }
   .db-table .ant-progress-bg    { border-radius: 99px !important; }
 
+  /* Horizontal scroll wrapper for table on mobile */
+  .db-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* ── Chips ── */
   .db-chip {
     display: inline-block;
     background: #f5f5f5; color: #595959;
@@ -96,18 +120,80 @@ const S = `
     background: #f6ffed; color: #389e0d;
     border-radius: 5px; font-size: 11.5px; font-weight: 600;
     padding: 3px 10px;
+    white-space: nowrap;
   }
-  .db-dots { display: flex; gap: 4px; margin-top: 8px; }
+  .db-dots { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
   .db-dot  { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
   .db-dot.on  { background: #f2547d; }
   .db-dot.off { background: #e8e8e8; }
 
+  /* ── Section label ── */
   .db-sec {
     font-size: 11px; font-weight: 600; letter-spacing: .06em;
     text-transform: uppercase; color: #bfbfbf;
     margin-bottom: 10px;
   }
   .db-pct-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+
+  /* ════════════════════════════════
+     RESPONSIVE BREAKPOINTS
+     ════════════════════════════════ */
+
+  /* Tablet – ≤ 1024px */
+  @media (max-width: 1024px) {
+    .db-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .db-chart-grid {
+      grid-template-columns: 1fr;
+    }
+    .db-kpi-num { font-size: 24px; }
+  }
+
+  /* Large mobile – ≤ 768px */
+  @media (max-width: 768px) {
+    .db-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .db-chart-grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .db-kpi {
+      padding: 14px;
+      border-radius: 12px;
+    }
+    .db-kpi-num { font-size: 22px; }
+    .db-kpi-label { font-size: 11px; }
+    .db-card-body { padding: 12px 14px; }
+    .db-card-head { padding: 12px 14px; }
+    .db-card-title { font-size: 12px; }
+  }
+
+  /* Small mobile – ≤ 480px */
+  @media (max-width: 480px) {
+    .db-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .db-kpi {
+      padding: 12px;
+      border-radius: 10px;
+    }
+    .db-kpi-top { margin-bottom: 10px; }
+    .db-kpi-icon { width: 28px; height: 28px; }
+    .db-kpi-num { font-size: 20px; }
+    .db-kpi-label { font-size: 10px; }
+    .db-chart-grid { gap: 8px; }
+    .db-card-body { padding: 10px 12px; }
+    .db-card-head { padding: 10px 12px; }
+    .db-sec { font-size: 10px; }
+
+    /* Shrink table font on very small screens */
+    .db-table .ant-table-tbody > tr > td { font-size: 12px !important; }
+    .db-table .ant-table-thead > tr > th { font-size: 10px !important; }
+  }
 `;
 
 const Ico = ({ d, size = 14 }: { d: string; size?: number }) => (
@@ -252,7 +338,9 @@ const DashboardPage = () => {
                         </svg>
                         Đã hoàn tất
                     </span>
-                    : <div>{m.map(i => <span key={i} className="db-chip">{i}</span>)}</div>;
+                    : <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                        {m.map(i => <span key={i} className="db-chip">{i}</span>)}
+                    </div>;
             }
         }
     ];
@@ -310,13 +398,17 @@ const DashboardPage = () => {
             {/* Table */}
             <div className="db-sec">Chi tiết</div>
             <div className="db-card db-table">
-                <Table
-                    columns={cols}
-                    dataSource={departments}
-                    rowKey="key"
-                    pagination={false}
-                    size="middle"
-                />
+                {/* Scroll wrapper for horizontal overflow on mobile */}
+                <div className="db-table-scroll">
+                    <Table
+                        columns={cols}
+                        dataSource={departments}
+                        rowKey="key"
+                        pagination={false}
+                        size="middle"
+                        scroll={{ x: 700 }}
+                    />
+                </div>
             </div>
 
         </PageContainer>
