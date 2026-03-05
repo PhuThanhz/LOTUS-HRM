@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
     Space,
     Tag,
-    Badge,
     Collapse,
     Skeleton,
     Card,
@@ -27,7 +26,6 @@ import { useParams, useSearchParams } from "react-router-dom";
 import PageContainer from "@/components/common/data-table/PageContainer";
 import DataTable from "@/components/common/data-table";
 import SearchFilter from "@/components/common/filter/SearchFilter";
-import AdvancedFilterSelect from "@/components/common/filter/AdvancedFilterSelect";
 
 import {
     useCareerPathsByDepartmentQuery,
@@ -42,13 +40,11 @@ const { Text } = Typography;
 
 type ViewMode = "department" | "band";
 
-// Parse số từ band label: "S1"->1, "M2"->2
 const parseBandNumber = (band: string): number => {
     const match = band?.match(/\d+/);
     return match ? parseInt(match[0], 10) : 999;
 };
 
-// Parse số từ positionLevelCode: "S1"->1, "S6"->6
 const parseLevelNumber = (code?: string | null): number => {
     if (!code) return 999;
     const match = code.match(/\d+/);
@@ -57,10 +53,6 @@ const parseLevelNumber = (code?: string | null): number => {
 
 const C = {
     pink: "#e91e8c",
-    pinkSoft: "#fdf2f8",
-    pinkBorder: "#fce7f3",
-    pinkText: "#be185d",
-    pinkLight: "#fbcfe8",
     white: "#ffffff",
     gray50: "#f9fafb",
     gray100: "#f3f4f6",
@@ -72,6 +64,7 @@ const C = {
     gray800: "#1f2937",
 };
 
+// ── Pill Tab Switcher ──────────────────────────────────────────────
 const ViewModeSwitcher = ({
     value,
     onChange,
@@ -138,7 +131,6 @@ const CareerPathTab = () => {
     const [dataInit, setDataInit] = useState<ICareerPath | null>(null);
 
     const [searchValue, setSearchValue] = useState("");
-    const [activeFilter, setActiveFilter] = useState<boolean | null>(true);
     const [viewMode, setViewMode] = useState<ViewMode>("department");
     const [showViewMode, setShowViewMode] = useState(false);
 
@@ -151,14 +143,13 @@ const CareerPathTab = () => {
 
     const isFetching = deptQuery.isFetching || bandQuery.isFetching;
 
-    // ── FIX: sort theo positionLevelCode trực tiếp, không tin bandOrder/levelNumber từ API
+    // Sort theo positionLevelCode trực tiếp — không dùng bandOrder/levelNumber từ API
     const sortCareerPaths = (paths: ICareerPath[]) =>
         [...paths].sort((a, b) => {
             const prefixA = (a.positionLevelCode ?? "").replace(/\d+/g, "").toUpperCase();
             const prefixB = (b.positionLevelCode ?? "").replace(/\d+/g, "").toUpperCase();
-            // Khác prefix (M vs S) → sort theo chữ
             if (prefixA !== prefixB) return prefixA.localeCompare(prefixB);
-            // Cùng prefix → S1 cao nhất → số nhỏ lên đầu (ascending)
+            // S1 = cao nhất → số nhỏ lên đầu
             return parseLevelNumber(a.positionLevelCode) - parseLevelNumber(b.positionLevelCode);
         });
 
@@ -171,13 +162,10 @@ const CareerPathTab = () => {
         });
 
     const filterPaths = (paths: ICareerPath[]) =>
-        paths.filter((item) => {
-            const matchSearch =
-                !searchValue ||
-                item.jobTitleName?.toLowerCase().includes(searchValue.toLowerCase());
-            const matchActive = activeFilter === null || item.active === activeFilter;
-            return matchSearch && matchActive;
-        });
+        paths.filter((item) =>
+            !searchValue ||
+            item.jobTitleName?.toLowerCase().includes(searchValue.toLowerCase())
+        );
 
     let filteredData: ICareerPath[] = [];
     let groupedData: IResCareerPathBandGroup[] = [];
@@ -194,7 +182,6 @@ const CareerPathTab = () => {
 
     const handleReset = () => {
         setSearchValue("");
-        setActiveFilter(true);
         deptQuery.refetch();
         bandQuery.refetch();
     };
@@ -245,18 +232,8 @@ const CareerPathTab = () => {
             ),
         },
         {
-            title: "Trạng thái",
-            dataIndex: "active",
-            render: (_: React.ReactNode, record: ICareerPath) =>
-                record.active ? (
-                    <Badge status="success" text="Hoạt động" />
-                ) : (
-                    <Badge status="error" text="Vô hiệu hóa" />
-                ),
-        },
-        {
             title: "Hành động",
-            width: 160,
+            width: 140,
             align: "center",
             render: (_: React.ReactNode, row: ICareerPath) => (
                 <Space size="small">
@@ -431,8 +408,6 @@ const CareerPathTab = () => {
                     <div
                         style={{
                             display: "flex",
-                            flexWrap: "wrap",
-                            gap: 10,
                             alignItems: "center",
                             marginTop: 14,
                         }}
@@ -450,22 +425,6 @@ const CareerPathTab = () => {
                         >
                             {showViewMode ? "Ẩn tùy chọn xem" : "Tùy chọn xem"}
                         </Button>
-
-                        <div style={{ minWidth: 200 }}>
-                            <AdvancedFilterSelect
-                                fields={[
-                                    {
-                                        key: "active",
-                                        label: "Trạng thái",
-                                        options: [
-                                            { label: "Hoạt động", value: true },
-                                            { label: "Vô hiệu hóa", value: false },
-                                        ],
-                                    },
-                                ]}
-                                onChange={(filters) => setActiveFilter(filters.active ?? null)}
-                            />
-                        </div>
                     </div>
 
                     {showViewMode && (
